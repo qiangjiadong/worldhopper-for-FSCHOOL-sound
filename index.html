@@ -64,29 +64,51 @@
       scene.add(spiral);
       
 // Load URLs and images from CSV file
-    fetch("links.csv") // path to CSV file in the root directory
-      .then(response => response.text())
-      .then(data => {
-        const links = document.createElement("div");
-        links.classList.add("links");
-        const rows = data.split("\n");
-        for (let i = 0; i < rows.length; i++) {
-          const cols = rows[i].split(",");
-          if (cols.length >= 2) {
-            const img = new Image();
-            img.src = `images/${cols[0].trim()}`; // add "images/" prefix to the image file name
-            img.onload = () => console.log(`Loaded image ${i+1}: ${img.src}`);
-            img.onerror = () => console.log(`Error loading image ${i+1}: ${img.src}`);
-            const link = document.createElement("div");
-            link.classList.add("link");
-            link.appendChild(img);
-            link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
-            links.appendChild(link);
-          }
+fetch("links.csv") // path to CSV file in the root directory
+  .then(response => response.text())
+  .then(data => {
+    const rows = data.split("\n");
+    const promises = [];
+    for (let i = 0; i < rows.length; i++) {
+      const cols = rows[i].split(",");
+      if (cols.length >= 2) {
+        const promise = new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = `images/${cols[0].trim()}`; // add "images/" prefix to the image file name
+        });
+        promises.push(promise);
+      }
+    }
+    Promise.all(promises).then(images => {
+      const links = document.createElement("div");
+      links.classList.add("links");
+      for (let i = 0; i < rows.length; i++) {
+        const cols = rows[i].split(",");
+        if (cols.length >= 2) {
+          const img = images.shift();
+          const link = document.createElement("div");
+          link.classList.add("link");
+          link.appendChild(img);
+          link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
+          links.appendChild(link);
+          const t = i / numBoxes * Math.PI * 2;
+          const x = Math.cos(t) * i / numBoxes * spiralRadius;
+          const y = i / numBoxes * spiralHeight;
+          const z = Math.sin(t) * i / numBoxes * spiralRadius;
+          const box = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: new THREE.Texture(img)}));
+          box.position.set(x, y, z);
+          box.lookAt(new THREE.Vector3());
+          box.name = `Box ${i+1}`;
+          spiral.add(box);
         }
-        document.body.appendChild(links);
-      })
-      .catch(error => console.log(error));
+      }
+      document.body.appendChild(links);
+    });
+  })
+  .catch(error => console.log(error));
+
 
 
 
