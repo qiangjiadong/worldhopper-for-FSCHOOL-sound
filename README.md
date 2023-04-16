@@ -12,18 +12,7 @@ Example of CSV you need to put in the root directory
 ```html
 <!DOCTYPE html>
 <html>
-  <!-- Here's a brief summary of how it works:
-
-  We create a canvas element and set its dimensions to fill the entire page.
-  We use the Three.js library to create a 3D spiral shape with trapezoid boxes. The numBoxes variable controls the number of boxes in the spiral, while spiralRadius and spiralHeight control the size and shape of the spiral.
-  We add each box to the spiral object and add the spiral to the scene.
-  We create a set of links, where each link represents a box in the spiral. The urls array contains the URLs that we want to open when a link is clicked.
-  We add each link to the page and add a click event listener to each link that opens the corresponding URL in a new window.
-  We create an animate() function that updates the rotation of the spiral and renders the scene every frame using Three.js.
-  We add a window resize event listener that updates the camera aspect ratio and renderer size when the window is resized. -->
-
-
-<head>
+  <head>
     <meta charset="utf-8">
     <title>Worldhopper</title>
     <style>
@@ -41,11 +30,14 @@ Example of CSV you need to put in the root directory
         border-radius: 50%;
         background-color: white;
         cursor: pointer;
+        transform: scale(0.8);
+        z-index: 1;
       }
       .link img {
-        max-width: 100%;
-        max-height: 100%;
+        max-width: 50%;
+        max-height: 50%;
       }
+
     </style>
   </head>
   <body>
@@ -58,6 +50,7 @@ Example of CSV you need to put in the root directory
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("canvas")});
       renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.position.z = 20;
       
       // Create a spiral shape with trapezoid boxes
       const numBoxes = 20;
@@ -81,23 +74,28 @@ Example of CSV you need to put in the root directory
       }
       scene.add(spiral);
       
-      // Load URLs into each box and add click event listeners
-      const urls = [
-        "https://www.example.com/page1.html",
-        "https://www.example.com/page2.html",
-        "https://www.example.com/page3.html",
-        // ...and so on
-      ];
-      const links = document.createElement("div");
-      links.classList.add("links");
-      for (let i = 0; i < numBoxes; i++) {
-        const link = document.createElement("div");
-        link.classList.add("link");
-        link.innerHTML = `<img src="https://www.example.com/image${i+1}.jpg" alt="Image ${i+1}">`;
-        link.addEventListener("click", () => window.open(urls[i], "_blank"));
-        links.appendChild(link);
-      }
-      document.body.appendChild(links);
+      // Load URLs and images from CSV file
+      fetch("links.csv")
+        .then(response => response.text())
+        .then(data => {
+          const links = document.createElement("div");
+          links.classList.add("links");
+          const rows = data.split("\n");
+          for (let i = 0; i < rows.length; i++) {
+            const cols = rows[i].split(",");
+            if (cols.length >= 2) {
+              const img = new Image();
+              img.src = `images/${cols[0].trim()}`;
+              const link = document.createElement("div");
+              link.classList.add("link");
+              link.appendChild(img);
+              link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
+              links.appendChild(link);
+            }
+          }
+          document.body.appendChild(links);
+        })
+        .catch(error => console.log(error));
       
       // Animate the scene
       const animate = function () {
