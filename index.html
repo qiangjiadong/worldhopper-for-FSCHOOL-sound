@@ -1,144 +1,96 @@
 <!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Worldhopper</title>
-    <meta http-equiv="Permissions-Policy" content="interest-cohort=()"/>
-    <style>
-      #canvas {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      .link {
-        position: absolute;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background-color: white;
-        cursor: pointer;
-        transform: scale(0.8);
-        z-index: 1;
-      }
-      .link img {
-        max-width: 50%;
-        max-height: 50%;
-      }
-
-    </style>
-  </head>
-  <body>
-    <canvas id="canvas"></canvas>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-      // Create a scene, camera, and renderer
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("canvas")});
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      camera.position.z = 20;
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-      
-      // Create a spiral shape with trapezoid planes
-     
-      const planeSize = 2;
-      const planeHeight = 2;
-      const spiralRadius = 10;
-      const spiralHeight = 10;
-      const geometry = new THREE.PlaneGeometry(planeSize, planeHeight);
-      
-      // Use MeshPhongMaterial instead of MeshBasicMaterial
-      const material = new THREE.MeshPhongMaterial({color: 0xffffff});
-      
-      const spiral = new THREE.Object3D();
-      for (let i = 0; i < numPlanes; i++) {
-        const t = i / numPlanes * Math.PI * 2;
-        const x = Math.cos(t) * i / numPlanes * spiralRadius;
-        const y = i / numPlanes * spiralHeight;
-        const z = Math.sin(t) * i / numPlanes * spiralRadius;
-        const plane = new THREE.Mesh(geometry, material);
-        plane.position.set(x, y, z);
-        plane.lookAt(new THREE.Vector3());
-        plane.name = `Plane ${i+1}`;
-        spiral.add(plane);
-      }
-      scene.add(spiral);
-
-      // Add a light source
-      const light = new THREE.PointLight(0xffffff, 1, 100);
-      light.position.set(10, 10, 10);
-      scene.add(light);
-      
-// Load URLs and images from CSV file
-fetch("links.csv")
-  .then(response => response.text())
-  .then(data => {
-    const rows = data.split("\n");
-    const numPlanes = rows.length; // Set the number of planes based on the number of rows in the CSV file
-    const promises = [];
-    for (let i = 0; i < rows.length; i++) {
-      const cols = rows[i].split(",");
-      if (cols.length >= 2) {
-        const promise = new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = `images/${cols[0].trim()}`;
-        });
-        promises.push(promise);
-      }
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Worldhopper</title>
+  <meta http-equiv="Permissions-Policy" content="interest-cohort=()"/>
+  <style>
+    #canvas {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
     }
-    Promise.all(promises).then(images => {
-  console.log("Images loaded:", images);
-  const links = document.createElement("div");
-  links.classList.add("links");
-  for (let i = 0; i < rows.length; i++) {
-    const cols = rows[i].split(",");
-    if (cols.length >= 2) {
-      const img = images.shift();
-      console.log("Adding image to link:", img);
-      const link = document.createElement("div");
-      link.classList.add("link");
-      link.appendChild(img);
-      link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
-      links.appendChild(link);
-      const t = i / rows.length * Math.PI * 2;
-      const x = Math.cos(t) * i / rows.length * spiralRadius;
-      const y = i / rows.length * spiralHeight;
-      const z = Math.sin(t) * i / rows.length * spiralRadius;
-      const texture = new THREE.Texture(img);
-      texture.needsUpdate = true;
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
 
-      const planeWithImage = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: texture}));
-      planeWithImage.position.set(x, y, z);
-      planeWithImage.lookAt(new THREE.Vector3());
-      planeWithImage.name = `Plane ${i+1}`;
-      planeWithImage.userData = { url: cols[1].trim() }; // Store the URL in the userData property
-      spiral.add(planeWithImage);
-    }
-  }
-  document.body.appendChild(links);
-}) // Add the missing closing bracket here
-.catch(error => console.log(error));
-})
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("canvas")});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.position.z = 20;
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
+    const planeSize = 2;
+    const planeHeight = 2;
+    const spiralRadius = 10;
+    const spiralHeight = 10;
+    const geometry = new THREE.PlaneGeometry(planeSize, planeHeight);
 
+    const material = new THREE.MeshPhongMaterial({color: 0xffffff});
+    const spiral = new THREE.Object3D();
 
-// Set the UVs for the geometry
-geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([
+    const light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    fetch("links.csv")
+      .then(response => response.text())
+      .then(data => {
+        const rows = data.split("\n");
+        const numPlanes = rows.length;
+        const promises = [];
+
+        for (let i = 0; i < rows.length; i++) {
+          const cols = rows[i].split(",");
+          if (cols.length >= 2) {
+            const promise = new Promise((resolve, reject) => {
+              const img = new Image();
+              img.onload = () => resolve(img);
+              img.onerror = reject;
+              img.src = `images/${cols[0].trim()}`;
+            });
+            promises.push(promise);
+          }
+        }
+
+        Promise.all(promises).then(images => {
+          for (let i = 0; i < rows.length; i++) {
+            const cols = rows[i].split(",");
+            if (cols.length >= 2) {
+              const img = images.shift();
+              const texture = new THREE.Texture(img);
+              texture.needsUpdate = true;
+
+              const planeWithImage = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: texture}));
+              const t = i / numPlanes * Math.PI * 2;
+              const x = Math.cos(t) * i / numPlanes * spiralRadius;
+              const y = i / numPlanes * spiralHeight;
+              const z = Math.sin(t) * i / numPlanes * spiralRadius;
+              planeWithImage.position.set(x, y, z);
+              planeWithImage.lookAt(new THREE.Vector3());
+              planeWithImage.name = `Plane ${i+1}`;
+              planeWithImage.userData = { url: cols[1].trim() }; // Store the URL in the userData property
+              spiral.add(planeWithImage);
+            }
+          }
+          scene.add(spiral);
+        }).catch(error => console.log(error));
+      });
+
+      geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([
   0, 0,
   1, 0,
   0, 1,
-
   1, 0,
   1, 1,
   0, 1,
 ]), 2));
-
 
 function onDocumentMouseDown(event) {
   event.preventDefault();
@@ -160,21 +112,19 @@ function onDocumentMouseDown(event) {
 
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 
-      
-      // Animate the scene
-      const animate = function () {
-        requestAnimationFrame(animate);
-        spiral.rotation.y += 0.005;
-        renderer.render(scene, camera);
-      };
-      animate();
-      
-      // Resize the canvas when the window size changes
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-    </script>
-  </body>
+const animate = function () {
+  requestAnimationFrame(animate);
+  spiral.rotation.y += 0.005;
+  renderer.render(scene, camera);
+};
+
+animate();
+
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+  </script>
+</body>
 </html>
