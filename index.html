@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+  <html>
   <head>
     <meta charset="utf-8">
     <title>Worldhopper</title>
@@ -48,7 +48,10 @@
       const spiralRadius = 5;
       const spiralHeight = 5;
       const geometry = new THREE.CylinderGeometry(boxSize, boxSize, boxHeight, 4, 1);
-      const material = new THREE.MeshBasicMaterial({color: 0xffffff});
+
+      // Use MeshPhongMaterial instead of MeshBasicMaterial
+      const material = new THREE.MeshPhongMaterial({color: 0xffffff});
+
       const spiral = new THREE.Object3D();
       for (let i = 0; i < numBoxes; i++) {
         const t = i / numBoxes * Math.PI * 2;
@@ -62,6 +65,11 @@
         spiral.add(box);
       }
       scene.add(spiral);
+
+      // Add a light source
+      const light = new THREE.PointLight(0xffffff, 1, 100);
+      light.position.set(10, 10, 10);
+      scene.add(light);
       
 // Load URLs and images from CSV file
 fetch("links.csv") // path to CSV file in the root directory
