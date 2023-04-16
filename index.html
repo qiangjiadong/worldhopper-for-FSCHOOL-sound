@@ -63,28 +63,29 @@
       }
       scene.add(spiral);
       
-      // Load URLs and images from CSV file
-      fetch("links.csv") // path to CSV file in the root directory
-        .then(response => response.text())
-        .then(data => {
-          const links = document.createElement("div");
-          links.classList.add("links");
-          const rows = data.split("\n");
-          for (let i = 0; i < rows.length; i++) {
-            const cols = rows[i].split(",");
-            if (cols.length >= 2) {
-              const img = new Image();
-              img.src = `images/${cols[0].trim()}`; // path to image file in the images directory
-              const link = document.createElement("div");
-              link.classList.add("link");
-              link.appendChild(img);
-              link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
-              links.appendChild(link);
-            }
-          }
-          document.body.appendChild(links);
-        })
-        .catch(error => console.log(error));
+// Load URLs and images from CSV file
+fetch("links.csv") // path to CSV file in the root directory
+  .then(response => response.text())
+  .then(data => {
+    const links = document.createElement("div");
+    links.classList.add("links");
+    const rows = data.split("\n");
+    for (let i = 0; i < rows.length; i++) {
+      const cols = rows[i].split(",");
+      if (cols.length >= 2) {
+        const img = new Image();
+        img.src = `images/${cols[0].trim()}`; // add "images/" prefix to the image file name
+        const link = document.createElement("div");
+        link.classList.add("link");
+        link.appendChild(img);
+        link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
+        links.appendChild(link);
+      }
+    }
+    document.body.appendChild(links);
+  })
+  .catch(error => console.log(error));
+
 
       
       // Animate the scene
