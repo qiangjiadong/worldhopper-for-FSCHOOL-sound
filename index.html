@@ -40,6 +40,8 @@
       const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("canvas")});
       renderer.setSize(window.innerWidth, window.innerHeight);
       camera.position.z = 20;
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
       
       // Create a spiral shape with trapezoid planes
       const numPlanes = 20;
@@ -90,34 +92,38 @@ fetch("links.csv")
       }
     }
     Promise.all(promises).then(images => {
-      console.log("Images loaded:", images);
-      const links = document.createElement("div");
-      links.classList.add("links");
-      for (let i = 0; i < rows.length; i++) {
-        const cols = rows[i].split(",");
-        if (cols.length >= 2) {
-          const img = images.shift();
-          console.log("Adding image to link:", img);
-          const link = document.createElement("div");
-          link.classList.add("link");
-          link.appendChild(img);
-          link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
-          links.appendChild(link);
-          const t = i / rows.length * Math.PI * 2;
-          const x = Math.cos(t) * i / rows.length * spiralRadius;
-          const y = i / rows.length * spiralHeight;
-          const z = Math.sin(t) * i / rows.length * spiralRadius;
-          const box = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: new THREE.Texture(img)}));
-          box.position.set(x, y, z);
-          box.lookAt(new THREE.Vector3());
-          box.name = `Box ${i+1}`;
-          spiral.add(box);
-        }
-      }
-      document.body.appendChild(links);
-    });
-  })
-  .catch(error => console.log(error));
+  console.log("Images loaded:", images);
+  const links = document.createElement("div");
+  links.classList.add("links");
+  for (let i = 0; i < rows.length; i++) {
+    const cols = rows[i].split(",");
+    if (cols.length >= 2) {
+      const img = images.shift();
+      console.log("Adding image to link:", img);
+      const link = document.createElement("div");
+      link.classList.add("link");
+      link.appendChild(img);
+      link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
+      links.appendChild(link);
+      const t = i / rows.length * Math.PI * 2;
+      const x = Math.cos(t) * i / rows.length * spiralRadius;
+      const y = i / rows.length * spiralHeight;
+      const z = Math.sin(t) * i / rows.length * spiralRadius;
+      const texture = new THREE.Texture(img);
+      texture.needsUpdate = true;
+
+      const planeWithImage = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: texture}));
+      planeWithImage.position.set(x, y, z);
+      planeWithImage.lookAt(new THREE.Vector3());
+      planeWithImage.name = `Plane ${i+1}`;
+      planeWithImage.userData = { url: cols[1].trim() }; // Store the URL in the userData property
+      spiral.add(planeWithImage);
+    }
+  }
+  document.body.appendChild(links);
+})
+.catch(error => console.log(error));
+
 
 
 // Set the UVs for the geometry
@@ -132,6 +138,25 @@ geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([
 ]), 2));
 
 
+function onDocumentMouseDown(event) {
+  event.preventDefault();
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObjects(spiral.children);
+
+  if (intersects.length > 0) {
+    const firstIntersect = intersects[0];
+    if (firstIntersect.object.userData.url) {
+      window.open(firstIntersect.object.userData.url, '_blank');
+    }
+  }
+}
+
+document.addEventListener('mousedown', onDocumentMouseDown, false);
 
       
       // Animate the scene
