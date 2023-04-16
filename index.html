@@ -118,9 +118,6 @@ fetch("links.csv") // path to CSV file in the root directory
   .catch(error => console.log(error));
 
 
-  const geometry = new THREE.PlaneBufferGeometry(planeSize, planeHeight);
-const material = new THREE.MeshPhongMaterial({ color: 0xffffff });
-
 // Set the UVs for the geometry
 geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([
   0, 0,
