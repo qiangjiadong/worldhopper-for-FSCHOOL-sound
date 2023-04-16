@@ -72,7 +72,7 @@
       scene.add(light);
       
 // Load URLs and images from CSV file
-fetch("links.csv") // path to CSV file in the root directory
+fetch("links.csv")
   .then(response => response.text())
   .then(data => {
     const rows = data.split("\n");
@@ -84,20 +84,20 @@ fetch("links.csv") // path to CSV file in the root directory
           const img = new Image();
           img.onload = () => resolve(img);
           img.onerror = reject;
-          img.src = `images/${cols[0].trim()}`; // add "images/" prefix to the image file name
+          img.src = `images/${cols[0].trim()}`;
         });
         promises.push(promise);
       }
     }
-    PPromise.all(promises).then(images => {
-      console.log("Images loaded:", images); // add this line to log the loaded images
+    Promise.all(promises).then(images => {
+      console.log("Images loaded:", images);
       const links = document.createElement("div");
       links.classList.add("links");
       for (let i = 0; i < rows.length; i++) {
         const cols = rows[i].split(",");
         if (cols.length >= 2) {
           const img = images.shift();
-          console.log("Adding image to link:", img); // add this line to log the image being added to the link
+          console.log("Adding image to link:", img);
           const link = document.createElement("div");
           link.classList.add("link");
           link.appendChild(img);
