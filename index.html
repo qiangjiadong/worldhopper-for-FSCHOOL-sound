@@ -89,13 +89,15 @@ fetch("links.csv") // path to CSV file in the root directory
         promises.push(promise);
       }
     }
-    Promise.all(promises).then(images => {
+    PPromise.all(promises).then(images => {
+      console.log("Images loaded:", images); // add this line to log the loaded images
       const links = document.createElement("div");
       links.classList.add("links");
       for (let i = 0; i < rows.length; i++) {
         const cols = rows[i].split(",");
         if (cols.length >= 2) {
           const img = images.shift();
+          console.log("Adding image to link:", img); // add this line to log the image being added to the link
           const link = document.createElement("div");
           link.classList.add("link");
           link.appendChild(img);
