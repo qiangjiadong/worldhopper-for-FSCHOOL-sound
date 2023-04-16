@@ -41,28 +41,28 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       camera.position.z = 20;
       
-      // Create a spiral shape with trapezoid boxes
-      const numBoxes = 20;
-      const boxSize = 2;
-      const boxHeight = 0.5;
+      // Create a spiral shape with trapezoid planes
+      const numPlanes = 20;
+      const planeSize = 2;
+      const planeHeight = 0.5;
       const spiralRadius = 5;
       const spiralHeight = 5;
-      const geometry = new THREE.CylinderGeometry(boxSize, boxSize, boxHeight, 4, 1);
-
+      const geometry = new THREE.PlaneGeometry(planeSize, planeHeight);
+      
       // Use MeshPhongMaterial instead of MeshBasicMaterial
       const material = new THREE.MeshPhongMaterial({color: 0xffffff});
-
+      
       const spiral = new THREE.Object3D();
-      for (let i = 0; i < numBoxes; i++) {
-        const t = i / numBoxes * Math.PI * 2;
-        const x = Math.cos(t) * i / numBoxes * spiralRadius;
-        const y = i / numBoxes * spiralHeight;
-        const z = Math.sin(t) * i / numBoxes * spiralRadius;
-        const box = new THREE.Mesh(geometry, material);
-        box.position.set(x, y, z);
-        box.lookAt(new THREE.Vector3());
-        box.name = `Box ${i+1}`;
-        spiral.add(box);
+      for (let i = 0; i < numPlanes; i++) {
+        const t = i / numPlanes * Math.PI * 2;
+        const x = Math.cos(t) * i / numPlanes * spiralRadius;
+        const y = i / numPlanes * spiralHeight;
+        const z = Math.sin(t) * i / numPlanes * spiralRadius;
+        const plane = new THREE.Mesh(geometry, material);
+        plane.position.set(x, y, z);
+        plane.lookAt(new THREE.Vector3());
+        plane.name = `Plane ${i+1}`;
+        spiral.add(plane);
       }
       scene.add(spiral);
 
@@ -101,10 +101,10 @@ fetch("links.csv") // path to CSV file in the root directory
           link.appendChild(img);
           link.addEventListener("click", () => window.open(cols[1].trim(), "_blank"));
           links.appendChild(link);
-          const t = i / numBoxes * Math.PI * 2;
-          const x = Math.cos(t) * i / numBoxes * spiralRadius;
-          const y = i / numBoxes * spiralHeight;
-          const z = Math.sin(t) * i / numBoxes * spiralRadius;
+          const t = i / rows.length * Math.PI * 2;
+          const x = Math.cos(t) * i / rows.length * spiralRadius;
+          const y = i / rows.length * spiralHeight;
+          const z = Math.sin(t) * i / rows.length * spiralRadius;
           const box = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: new THREE.Texture(img)}));
           box.position.set(x, y, z);
           box.lookAt(new THREE.Vector3());
