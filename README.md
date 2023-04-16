@@ -15,6 +15,7 @@ Example of CSV you need to put in the root directory
   <head>
     <meta charset="utf-8">
     <title>Worldhopper</title>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()"/>
     <style>
       #canvas {
         width: 100%;
@@ -75,7 +76,7 @@ Example of CSV you need to put in the root directory
       scene.add(spiral);
       
       // Load URLs and images from CSV file
-      fetch("links.csv")
+      fetch("links.csv") // path to CSV file in the root directory
         .then(response => response.text())
         .then(data => {
           const links = document.createElement("div");
@@ -85,7 +86,7 @@ Example of CSV you need to put in the root directory
             const cols = rows[i].split(",");
             if (cols.length >= 2) {
               const img = new Image();
-              img.src = `images/${cols[0].trim()}`;
+              img.src = `images/${cols[0].trim()}`; // path to image file in the images directory
               const link = document.createElement("div");
               link.classList.add("link");
               link.appendChild(img);
@@ -96,6 +97,7 @@ Example of CSV you need to put in the root directory
           document.body.appendChild(links);
         })
         .catch(error => console.log(error));
+
       
       // Animate the scene
       const animate = function () {
